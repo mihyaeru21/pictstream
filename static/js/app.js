@@ -30,7 +30,7 @@ function main() {
   function add_mesh_to_scene(image_url, scene) {
     var geometry = new THREE.BoxGeometry( 5, 5, 0.5 );
 
-    var texture = new THREE.TextureLoader().load(image_url);
+    var texture = THREE.ImageUtils.loadTexture(image_url);
     var material = new THREE.MeshPhongMaterial( {map: texture} );
 
     var mesh = create_mesh(geometry, material);
@@ -53,7 +53,12 @@ function main() {
   var camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
   camera.position.set( 0, 0, 50 );
 
-  var renderer = new THREE.WebGLRenderer();
+  var renderer;
+  if (window.WebGLRenderingContext) {
+    renderer = new THREE.WebGLRenderer();
+  } else {
+    renderer = new THREE.CanvasRenderer();
+  }
   renderer.setClearColor(new THREE.Color(0xffffff));
   renderer.setSize( width, height );
   document.body.appendChild( renderer.domElement );
