@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+
+class Config(object):
+    DEBUG = True
+    TESTING = False
+    API_KEY       = 'api_key'
+    API_SECRET    = 'api_secret'
+    ACCESS_KEY    = 'access_key'
+    ACCESS_SECRET = 'access_secret'
