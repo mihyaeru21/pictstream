@@ -17,7 +17,7 @@ class TwitterListener(tweepy.streaming.StreamListener):
             return
         text = unescape(tweet.text)
         for message in _messages_from_tweet(tweet):
-            self.socketio.emit('my response', message, namespace='/test')
+            self.socketio.emit('my response', message, namespace='/stream')
 
     def run(self):
         stream = tweepy.Stream(self.api.auth, listener = self, retry_count = 10, retry_time = 60.0)

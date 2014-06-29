@@ -20,7 +20,7 @@ def public_stream_in_background():
 def index():
     return app.send_static_file('index.html')
 
-@socketio.on('connect', namespace='/test')
+@socketio.on('connect', namespace='/stream')
 def test_connect():
     print 'connected!'
     global thread
@@ -28,7 +28,7 @@ def test_connect():
         thread = Thread(target=public_stream_in_background)
         thread.start()
 
-@socketio.on('disconnect', namespace='/test')
+@socketio.on('disconnect', namespace='/stream')
 def test_disconnect():
     print 'Client disconnected'
 

@@ -81,7 +81,7 @@ function main () {
 main();
 
 $(document).ready(function(){
-  var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+  var socket = io.connect('http://' + document.domain + ':' + location.port + '/stream');
   socket.on('my response', function(message) {
     console.log(message.image_url + ' : ' + message.tweet_url);
   });
