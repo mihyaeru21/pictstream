@@ -1,8 +1,47 @@
-function r () {
-  return (Math.random() - 0.5) * 100;
-}
+function main() {
+  function r() {
+    return (Math.random() - 0.5) * 100;
+  }
 
-function main () {
+  function create_mesh(geometry, material) {
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.position.x = (Math.random() > 0.5) ? 100 : -100;
+    mesh.position.y = (Math.random() > 0.5) ? 100 : -100;
+
+    // 回転速度
+    mesh.rotation_d_y = (Math.random() - 0.5) / 20;
+    mesh.rotation_d_z = (Math.random() - 0.5) / 20;
+
+    return mesh;
+  }
+
+  function create_tween(mesh) {
+    return new TWEEN.Tween( mesh.position )
+      .to( { x: [r(), r(), r()], y: [r(), r(), r()] }, 4000 )
+      .easing(TWEEN.Easing.Quartic.InOut)
+      .interpolation(TWEEN.Interpolation.CatmullRom)
+      // .delay(500 * i)
+      .onUpdate( function() {
+        mesh.position.x = this.x;
+        mesh.position.y = this.y;
+      });
+  }
+
+  function add_mesh_to_scene(image_url, scene) {
+    var geometry = new THREE.BoxGeometry( 5, 5, 0.5 );
+
+    var texture = new THREE.TextureLoader().load(image_url);
+    var material = new THREE.MeshPhongMaterial( {map: texture} );
+
+    var mesh = create_mesh(geometry, material);
+    scene.add(mesh);
+    meshes.push(mesh);
+
+    var tween = create_tween(mesh);
+    tween.start();
+    tweens.push(tween);
+  }
+
   var scene = new THREE.Scene();
 
   var width = window.innerWidth;
@@ -23,44 +62,8 @@ function main () {
   directionalLight.position.set( 0, 0.7, 0.7 );
   scene.add( directionalLight );
 
-
   var meshes = [];
   var tweens = [];
-  var geometry = new THREE.BoxGeometry( 5, 5, 0.5 );
-  for (var i = 0; i < 50; i++) {
-    var material = new THREE.MeshPhongMaterial({
-      map: THREE.ImageUtils.loadTexture('static/img/img' + Math.floor(Math.random()*30+1) + '.jpg', {}, function() {renderer.render(scene, camera);})
-    });
-
-    var mesh = new THREE.Mesh(geometry, material);
-    mesh.position.x = (i % 2 == 0) ? 100 : -100;
-    mesh.position.y = (i % 2 != 0) ? 100 : -100;
-    scene.add(mesh);
-    meshes.push(mesh);
-
-    // 回転速度
-    mesh.rotation_d_y = (Math.random() - 0.5) / 20;
-    mesh.rotation_d_z = (Math.random() - 0.5) / 20;
-
-    var initial_position = { x: mesh.position.x, y: mesh.position.y };
-
-    // 移動周り
-    var tween = new TWEEN.Tween( mesh.position )
-      .to( { x: [r(), r(), r()], y: [r(), r(), r()] }, 4000 )
-      .easing(TWEEN.Easing.Quartic.InOut)
-      .interpolation(TWEEN.Interpolation.CatmullRom)
-      .delay(500 * i)
-      .onUpdate( function() {
-        mesh.position.x = this.x;
-        mesh.position.y = this.y;
-      });
-    tweens.push(tween);
-  }
-
-  tweens.forEach( function (tween, index, ar) {
-    tween.start();
-  });
-
 
   function renderLoop () {
     requestAnimationFrame( renderLoop );
@@ -76,13 +79,15 @@ function main () {
   };
   renderLoop();
 
-};
+  // 鯖と繋ぐあれ
+  $(document).ready(function(){
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/stream');
+    socket.on('my response', function(message) {
+      console.log(message.image_url + ' : ' + message.tweet_url);
+      add_mesh_to_scene(message.image_url, scene);
+    });
+  });
+}
 
 main();
 
-$(document).ready(function(){
-  var socket = io.connect('http://' + document.domain + ':' + location.port + '/stream');
-  socket.on('my response', function(message) {
-    console.log(message.image_url + ' : ' + message.tweet_url);
-  });
-});
