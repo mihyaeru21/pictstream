@@ -11,9 +11,14 @@ app = Flask(__name__, static_url_path='/static')
 app.config.from_object('config.Config')
 socketio = SocketIO(app)
 
-thread = None
+_stream_thread = None
 def public_stream_in_background():
-    listner = TwitterListener(app.config['API_KEY'], app.config['API_SECRET'], app.config['ACCESS_KEY'], app.config['ACCESS_SECRET'], socketio)
+    listner = TwitterListener(
+        app.config['API_KEY'],
+        app.config['API_SECRET'],
+        app.config['ACCESS_KEY'],
+        app.config['ACCESS_SECRET'],
+        socketio)
     listner.run()
 
 @app.route('/')
@@ -23,10 +28,10 @@ def index():
 @socketio.on('connect', namespace='/stream')
 def test_connect():
     print 'connected!'
-    global thread
-    if thread is None:
-        thread = Thread(target=public_stream_in_background)
-        thread.start()
+    global _stream_thread
+    if _stream_thread is None:
+        _stream_thread = Thread(target=public_stream_in_background)
+        _stream_thread.start()
 
 @socketio.on('disconnect', namespace='/stream')
 def test_disconnect():

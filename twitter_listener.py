@@ -2,10 +2,18 @@
 import re
 import sys
 import os.path
+import glob
 import urllib2
+import time
+import datetime
+from threading import Thread
 from xml.sax.saxutils import unescape
 
 import tweepy
+
+_remove_th = 60
+_cleanup_thread = None
+_image_dir = os.path.join('static', 'img')
 
 class TwitterListener(tweepy.streaming.StreamListener):
     def __init__(self, api_key, api_secret, access_key, access_secret, socketio):
@@ -25,6 +33,11 @@ class TwitterListener(tweepy.streaming.StreamListener):
                 self.socketio.emit('my response', message, namespace='/stream')
 
     def run(self):
+        global _cleanup_thread
+        if _cleanup_thread is None:
+            _cleanup_thread = Thread(target=cleanup_image_dir)
+            _cleanup_thread.start()
+        # twitter
         stream = tweepy.Stream(self.api.auth, listener = self, retry_count = 10, retry_time = 60.0)
         stream.sample()
 
@@ -58,5 +71,19 @@ r = re.compile(':(thumb|large|orig)')
 def _get_filepath(image_url):
     name_with_size = os.path.basename(image_url)
     name = r.sub('', name_with_size)
-    return os.path.join('static', 'img', name)
+    return os.path.join(_image_dir, name)
+
+
+def cleanup_image_dir():
+    while (True):
+        time.sleep(_remove_th)
+        _remove_old_images()
+
+def _remove_old_images():
+    path = os.path.join(_image_dir, '*')
+    files = glob.glob(path)
+    for filename in files:
+        if time.time() - os.path.getctime(filename) > _remove_th:
+            os.remove(filename)
+            print 'removed:', filename
 
