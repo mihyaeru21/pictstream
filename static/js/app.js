@@ -12,19 +12,37 @@ function main() {
     mesh.rotation_d_y = (Math.random() - 0.5) / 20;
     mesh.rotation_d_z = (Math.random() - 0.5) / 20;
 
+    // 初期座標
+    mesh.initial_x = mesh.position.x;
+    mesh.initial_y = mesh.position.y;
+
     return mesh;
   }
 
   function create_tween(mesh) {
-    return new TWEEN.Tween( mesh.position )
+    var enter = new TWEEN.Tween( mesh.position )
       .to( { x: [r(), r(), r()], y: [r(), r(), r()] }, 4000 )
       .easing(TWEEN.Easing.Quartic.InOut)
       .interpolation(TWEEN.Interpolation.CatmullRom)
-      // .delay(500 * i)
       .onUpdate( function() {
         mesh.position.x = this.x;
         mesh.position.y = this.y;
       });
+    var exit = new TWEEN.Tween( mesh.position )
+      .to( { x: [r(), r(), mesh.initial_x], y: [r(), r(), mesh.initial_y] }, 4000 )
+      .easing(TWEEN.Easing.Quartic.InOut)
+      .interpolation(TWEEN.Interpolation.CatmullRom)
+      .delay(10000)
+      .onUpdate( function() {
+        mesh.position.x = this.x;
+        mesh.position.y = this.y;
+      })
+      .onComplete( function() {
+        mesh.parent.remove(mesh);
+      });
+
+    enter.chain(exit);
+    return enter;
   }
 
   function add_mesh_to_scene(image_url, scene) {
@@ -35,11 +53,9 @@ function main() {
 
     var mesh = create_mesh(geometry, material);
     scene.add(mesh);
-    meshes.push(mesh);
 
     var tween = create_tween(mesh);
     tween.start();
-    tweens.push(tween);
   }
 
   var scene = new THREE.Scene();
@@ -59,7 +75,7 @@ function main() {
   } else {
     renderer = new THREE.CanvasRenderer();
   }
-  renderer.setClearColor(new THREE.Color(0xffffff));
+  renderer.setClearColor(new THREE.Color(0xe8e8e8));
   renderer.setSize( width, height );
   document.body.appendChild( renderer.domElement );
 
@@ -67,16 +83,14 @@ function main() {
   directionalLight.position.set( 0, 0.7, 0.7 );
   scene.add( directionalLight );
 
-  var meshes = [];
-  var tweens = [];
-
   function renderLoop () {
     requestAnimationFrame( renderLoop );
-    meshes.forEach( function (mesh, index, ar) {
-      mesh.rotation.set(
+    scene.children.forEach( function (child, index, arr) {
+      if (! child instanceof THREE.Mesh) return;
+      child.rotation.set(
         0,
-        mesh.rotation.y + mesh.rotation_d_y,
-        mesh.rotation.z + mesh.rotation_d_z
+        child.rotation.y + child.rotation_d_y,
+        child.rotation.z + child.rotation_d_z
         );
     });
     TWEEN.update();
@@ -88,7 +102,7 @@ function main() {
   $(document).ready(function(){
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/stream');
     socket.on('my response', function(message) {
-      console.log(message.image_url + ' : ' + message.tweet_url);
+      // console.log(message.image_url + ' : ' + message.tweet_url);
       add_mesh_to_scene(message.image_url, scene);
     });
   });
