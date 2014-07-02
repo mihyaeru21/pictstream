@@ -49,7 +49,9 @@ function main() {
     var geometry = new THREE.BoxGeometry( 5, 5, 0.5 );
 
     var texture = THREE.ImageUtils.loadTexture(image_url);
-    var material = new THREE.MeshPhongMaterial( {map: texture} );
+    var face = new THREE.MeshPhongMaterial( {map: texture} );
+    var edge = new THREE.MeshPhongMaterial( { color: 0x3e3e3e } );
+    var material = new THREE.MeshFaceMaterial([edge, edge, edge, edge, face, face]);
 
     var mesh = create_mesh(geometry, material);
     scene.add(mesh);
