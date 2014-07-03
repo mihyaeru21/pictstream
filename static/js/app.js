@@ -46,7 +46,7 @@ function main() {
   }
 
   function add_mesh_to_scene(image_url, scene) {
-    var geometry = new THREE.BoxGeometry( 5, 5, 0.5 );
+    var geometry = new THREE.BoxGeometry( 4.5, 4.5, 0.15 );
 
     var texture = THREE.ImageUtils.loadTexture(image_url);
     var face = new THREE.MeshPhongMaterial( {map: texture} );
@@ -72,13 +72,14 @@ function main() {
   camera.position.set( 0, 0, 50 );
 
   var renderer;
-  if (window.WebGLRenderingContext) {
-    renderer = new THREE.WebGLRenderer();
+  if (Detector.webgl) {
+    renderer = new THREE.WebGLRenderer({antialias:true});
   } else {
     renderer = new THREE.CanvasRenderer();
   }
   renderer.setClearColor(new THREE.Color(0xe8e8e8));
   renderer.setSize( width, height );
+  renderer.devicePixelRatio = window.devicePixelRatio;
   document.body.appendChild( renderer.domElement );
 
   var directionalLight = new THREE.DirectionalLight( 0xffffff );
