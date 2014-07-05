@@ -3,3 +3,21 @@ body {
   overflow: hidden;
 }
 
+canvas {
+  background-color: #e8e8e8;
+}
+
+#footer {
+  color: #999999;
+  position: absolute;
+  bottom: 0;
+  left:50%;
+  -moz-transform: translate(-50%,-50%);
+  -webkit-transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
+}
+
+#footer a, a:hover, a:active, a:visited {
+  color: #707070;
+  text-decoration: none;
+}

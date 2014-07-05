@@ -72,15 +72,15 @@ function main() {
   camera.position.set( 0, 0, 50 );
 
   var renderer;
+  var canvas = document.getElementById("stream_canvas");
   if (Detector.webgl) {
-    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
   } else {
-    renderer = new THREE.CanvasRenderer();
+    renderer = new THREE.CanvasRenderer({canvas:canvas});
   }
   renderer.setClearColor(new THREE.Color(0xe8e8e8));
   renderer.setSize( width, height );
   renderer.devicePixelRatio = window.devicePixelRatio;
-  document.body.appendChild( renderer.domElement );
 
   var directionalLight = new THREE.DirectionalLight( 0xffffff );
   directionalLight.position.set( 0, 0.7, 0.7 );
